@@ -86,6 +86,7 @@ class App extends Component{
         })
     }
     add = (value, company, id, followId) => {
+        const {companies} = this.state
         const updateItem = () => axios.put(`${API}/users/${id}/followingCompanies/${followId}`, {rating: value })
         const deleteItem = () => axios.delete(`${API}/users/${id}/followingCompanies/${this.state.following[0].id}`)
         const addItem =  () => axios.post(`${API}/users/${id}/followingCompanies`,{ 
@@ -95,14 +96,8 @@ class App extends Component{
         const getCompanies = () => axios.get(`${API}/companies`)
         if (followId) { 
             updateItem()
-            .then(()=> {
-                return Promise.all([getFollowing(), getCompanies()])
-            }).then(([following, companies]) => {
-                this.setState({
-                    companies: companies.data,
-                    following: following.data
-                })
-            }) 
+            .then(() => getFollowing())
+            .then(res => this.setState({following:res.data}))
         }
         else {
             if (this.state.following.length === 5){
@@ -110,32 +105,18 @@ class App extends Component{
             .then(() => axios.post(`${API}/users/${id}/followingCompanies`,{ 
                 rating: value,
                 companyId: company.id,}))
-            .then(() => axios.get(`${API}/users/${id}/followingCompanies`))
-            .then(()=> {
-                return Promise.all([getFollowing(), getCompanies()])
-            }).then(([following, companies]) => {
-                this.setState({
-                    companies: companies.data,
-                    following: following.data
-                })
-            }) 
+                .then(() => getFollowing())
+                .then(res => this.setState({following:res.data}))
         }
         else{
         axios.post(`${API}/users/${id}/followingCompanies`,{ 
             rating: value,
             companyId: company.id,})
-            .then(() => axios.get(`${API}/users/${id}/followingCompanies`))
-            .then(()=> {
-                return Promise.all([getFollowing(), getCompanies()])
-            }).then(([following, companies]) => {
-                this.setState({
-                    companies: companies.data,
-                    following: following.data
-                })
-            }) 
-        }
+            .then(() => getFollowing())
+            .then(res => this.setState({following:res.data}))
     }
     }
+}
     render(){
         const {id, companies, user, loading, following, add} = this.state
         if(loading === true) return <h1>Loading...</h1>
